@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storm Editor - AI-Powered Code Editor</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- W3 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Monaco Editor CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- File Explorer Sidebar -->
+        <div class="file-explorer">
+            <div class="explorer-header">
+                <span>EXPLORER</span>
+                <div class="explorer-actions">
+                    <button id="new-file-btn" class="explorer-action-btn" title="New File">
+                        <i class="fas fa-file-circle-plus"></i>
+                    </button>
+                    <button id="new-folder-btn" class="explorer-action-btn" title="New Folder">
+                        <i class="fas fa-folder-plus"></i>
+                    </button>
+                    <button id="upload-file-btn" class="explorer-action-btn" title="Upload File">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="file-tree" id="file-tree">
+                <!-- File tree will be populated here -->
+                <div class="empty-explorer-message">No files yet. Create or upload a file to get started.</div>
+            </div>
+        </div>
+
+        <div class="editor-container">
+            <!-- Tabs for multiple files -->
+            <div class="editor-tabs">
+                <div class="tabs-container" id="editor-tabs-container">
+                    <!-- Tabs will be added here -->
+                </div>
+                <div class="tabs-actions">
+                    <button id="add-tab-btn" class="tab-action-btn" title="New File">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="editor-header">
+                <div class="language-selector">
+                    <span class="editor-language">HTML</span>
+                    <select id="editor-language-selector" class="language-dropdown">
+                        <!-- Options will be populated from JavaScript -->
+                    </select>
+                </div>
+                <div class="editor-actions">
+                    <button id="preview-code" class="action-btn" title="Preview Code">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="save-file" class="action-btn" title="Save File">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="monaco-editor"></div>
+        </div>
+        <div class="chat-container" id="sidebar">
+            <div class="sidebar-toolbar">
+                <button id="chat-tab" class="tab-btn active">
+                    <i class="fas fa-comments"></i> Chat
+                </button>
+                <button id="settings-tab" class="tab-btn">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button id="fullscreen-chat-btn" class="tab-btn" title="Open Fullscreen Chat">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+            <div id="settings-panel" class="settings-panel hidden">
+                <h3>Settings</h3>
+                <div class="setting-item">
+                    <label>AI Model:</label>
+                    <select id="model-selector" class="model-dropdown">
+                        <option value="gemini">Gemini 2.0 Flash</option>
+                        <option value="openrouter">OpenRouter API</option>
+                        <option value="phi">Phi (Paxsenix)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Sidebar Width:</label>
+                    <input type="range" id="sidebar-width" min="250" max="600" value="300">
+                </div>
+                
+                <h3>API Keys</h3>
+                <div class="api-keys-container">
+                    <div class="api-key-item">
+                        <label for="gemini-key">Gemini API Key:</label>
+                        <div class="api-key-input-group">
+                            <input type="password" id="gemini-key" class="api-key-input" placeholder="Enter Gemini API key">
+                            <button class="toggle-visibility-btn" data-for="gemini-key">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="api-key-item">
+                        <label for="openrouter-key">OpenRouter API Key:</label>
+                        <div class="api-key-input-group">
+                            <input type="password" id="openrouter-key" class="api-key-input" placeholder="Enter OpenRouter API key">
+                            <button class="toggle-visibility-btn" data-for="openrouter-key">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="api-key-item">
+                        <label for="openrouter-model">OpenRouter Model ID:</label>
+                        <select id="openrouter-model" class="model-dropdown">
+                            <option value="deepseek/deepseek-r1-distill-llama-70b:free">Deepseek R1 Distill Llama 70B</option>
+                            <option value="cognitivecomputations/dolphin3.0-r1-mistral-24b:free">Dolphin3.0 R1 Mistral 24B</option>
+                            <option value="qwen/qwen-vl-plus:free">Qwen VL Plus</option>
+                            <option value="qwen/qwen2.5-vl-72b-instruct:free">Qwen2.5 VL 72B Instruct</option>
+                            <option value="mistralai/mistral-small-24b-instruct-2501:free">Mistral Small 3</option>
+                            <option value="google/gemini-2.0-flash-thinking-exp-1219:free">Gemini 2.0 Flash Thinking</option>
+                            <option value="sophosympatheia/rogue-rose-103b-v0.2:free">Rogue Rose 103B v0.2</option>
+                            <option value="deepseek/deepseek-chat:free">DeepSeek V3</option>
+                            <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct</option>
+                            <option value="nvidia/llama-3.1-nemotron-70b-instruct:free">Llama 3.1 Nemotron 70B</option>
+                            <option value="meta-llama/llama-3.2-1b-instruct:free">Llama 3.2 1B Instruct</option>
+                            <option value="meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 11B Vision</option>
+                            <option value="meta-llama/llama-3.1-8b-instruct:free">Llama 3.1 8B Instruct</option>
+                            <option value="mistralai/mistral-nemo:free">Mistral Nemo</option>
+                            <option value="google/gemma-2-9b-it:free">Gemma 2 9B</option>
+                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B Instruct</option>
+                            <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini 128K</option>
+                            <option value="microsoft/phi-3-medium-128k-instruct:free">Phi-3 Medium 128K</option>
+                            <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B Instruct</option>
+                            <option value="openchat/openchat-7b:free">OpenChat 3.5 7B</option>
+                            <option value="undi95/toppy-m-7b:free">Toppy M 7B</option>
+                            <option value="huggingfaceh4/zephyr-7b-beta:free">Zephyr 7B</option>
+                            <option value="gryphe/mythomax-l2-13b:free">MythoMax 13B</option>
+                        </select>
+                    </div>
+                    <button id="save-api-keys" class="save-keys-btn">Save API Keys</button>
+                </div>
+            </div>
+            <div id="chat-panel">
+                <div class="chat-selector">
+                    <div class="chat-history-header">
+                        <span>Chat History</span>
+                        <button id="new-chat-btn" class="action-btn" title="New Chat">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="chat-history-list" class="chat-history-list">
+                        <!-- Chat history items will be added here -->
+                    </div>
+                </div>
+                <div class="active-chat">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <textarea id="chat-input" placeholder="Ask me anything about your code..."></textarea>
+                        <button id="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script src="keyboard-shortcuts.js"></script>
+    <script src="chats.js"></script>
+    <script src="toogle-sidebar.js"></script>
+    <script src="preview.js"></script>
+    <script>
+        // Handle preview button click
+        document.getElementById('preview-code').addEventListener('click', function() {
+            if (activeFileId) {
+                const file = findFileById(activeFileId);
+                if (file) {
+                    PreviewManager.preview(file);
+                }
+            }
+        });
+        
+        // Handle fullscreen chat button click
+        document.getElementById('fullscreen-chat-btn').addEventListener('click', function() {
+            window.location.href = 'fullscreen-chat.html';
+        });
+    </script>
+</body>
+</html>
